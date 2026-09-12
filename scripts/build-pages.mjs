@@ -1,0 +1,11 @@
+import {cp,mkdir,readFile,writeFile,rm} from 'node:fs/promises';
+import {resolve} from 'node:path';
+const output=resolve('dist-pages');
+await rm(output,{recursive:true,force:true});await mkdir(output,{recursive:true});await cp('public',output,{recursive:true});
+let html=await readFile('app/workspace.html','utf8');
+html=html.replace(/(href|src)="\//g,'$1="./');
+html=html.replace('<script type="module" src="./js/app.js"></script>', '<script src="./pages-config.js"></script><script type="module" src="./js/app.js"></script>');
+html=html.replace('<title>Velsign — Agreement workspace</title>','<title>Velsign — Browser-local signing workspace</title>');
+await writeFile(output+'/index.html',html);await writeFile(output+'/404.html',html);await writeFile(output+'/.nojekyll','');
+await writeFile(output+'/pages-config.js','globalThis.VELSIGN_CONFIG = Object.freeze({ mode: "local-demo" });\n');
+console.log('GitHub Pages edition built at '+output);
